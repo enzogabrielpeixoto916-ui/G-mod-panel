@@ -1,4 +1,4 @@
--- Script Unificado: Painel Flutuante Admin Max V4.1 (Ultimate Edition)
+-- Script Unificado: Painel Flutuante Admin Max V5.1 (Ultimate Edition)
 local Players = game:GetService("Players")
 local RunService = game:GetService("RunService")
 local Workspace = game:GetService("Workspace")
@@ -22,13 +22,15 @@ local freeCamPart = nil
 local godModeActive = false
 local godConnection = nil
 
--- Novas variáveis da V4
+-- Variáveis da V4 e V5
 local killAuraActive = false
 local killAuraConnection = nil
 local floatPart = nil
 local floatConnection = nil
 local fpsValue = 0
 local pingValue = 0
+local hitboxActive = false
+local hitboxConnection = nil
 
 -- Configuração do Sistema de Key Avançado (100 Chaves Aleatórias Sem Expiração)
 local BANCO_DE_KEYS = {
@@ -40,7 +42,7 @@ local BANCO_DE_KEYS = {
     ["KEY_jY4sC7wKtP"] = true, ["KEY_H1vM9nX3sQ"] = true, ["KEY_kL6zR2bWjF"] = true, ["KEY_pQ4mY8sK1v"] = true, ["KEY_tN2wX7zL9r"] = true,
     ["KEY_gB9vP3mK6s"] = true, ["KEY_jF1sQ4wYtZ"] = true, ["KEY_xR7mN2bCxP"] = true, ["KEY_vL4zK8wJtF"] = true, ["KEY_M1vP6nX9sK"] = true,
     ["bQ3rY7wJtG"] = true, ["KEY_nG8mK2vP5x"] = true, ["KEY_wX1bN6zLqF"] = true, ["KEY_jY7sC2wKtP"] = true, ["KEY_H4vM8nX1sQ"] = true,
-    ["KEY_kL9zR3bWjF"] = true, ["KEY_pQ2mY6sK7v"] = true, ["KEY_tN8wX1zL4r"] = true, ["KEY_gB3vP9mK2s"] = true, ["KEY_jF7sQ2wYtZ"] = true,
+    ["KEY_kL9zR3bWjF"] = true, ["KEY_pQ2mY6sK7v"] = true, ["KEY_tN8wX1zL4r"] = true, ["gB3vP9mK2s"] = true, ["KEY_jF7sQ2wYtZ"] = true,
     ["KEY_xR1mN6bCxP"] = true, ["KEY_vL9zK3wJtF"] = true, ["KEY_M2vP7nX4sK"] = true, ["KEY_bQ8rY1wJtG"] = true, ["KEY_nG3mK9vP2x"] = true,
     ["KEY_wX7bN4zLqF"] = true, ["KEY_jY2sC8wKtP"] = true, ["KEY_H6vM1nX9sQ"] = true, ["KEY_kL3zR7bWjF"] = true, ["KEY_pQ8mY2sK4v"] = true,
     ["KEY_tN1wX6zL8r"] = true, ["KEY_gB7vP2mK9s"] = true, ["KEY_jF3sQ8wYtZ"] = true, ["KEY_xR9mN4bCxP"] = true, ["KEY_vL2zK7wJtF"] = true,
@@ -55,9 +57,8 @@ local BANCO_DE_KEYS = {
 }
 
 local LINK_WHATSAPP = "https://chat.whatsapp.com/DTOSXCmR3S7K4LQ1f7kbBV?s=cl&p=a&mlu=3"
-
--- Tabela para guardar os objetos revelados e suas propriedades originais
 local objetosOcultosRevelados = {}
+local propriedadesIluminacaoOriginais = {}
 
 -- 1. INJEÇÃO DA INTERFACE VISUAL (GUI)
 local ScreenGui = Instance.new("ScreenGui")
@@ -75,7 +76,6 @@ for _, target in ipairs(targets) do
 end
 if not parentSucesso then pcall(function() gethui(ScreenGui) end) end
 
--- Janela Principal (Inicia invisível esperando a chave)
 local MainFrame = Instance.new("Frame")
 MainFrame.Size = UDim2.new(0, 300, 0, 130)
 MainFrame.Position = UDim2.new(0.5, -150, 0.2, 0)
@@ -90,7 +90,7 @@ local UICorner = Instance.new("UICorner")
 UICorner.CornerRadius = UDim.new(0, 8)
 UICorner.Parent = MainFrame
 
--- INTERFACE DO SISTEMA DE KEY (Sempre por cima)
+-- INTERFACE DO SISTEMA DE KEY
 local KeyFrame = Instance.new("Frame")
 KeyFrame.Size = UDim2.new(0, 300, 0, 150)
 KeyFrame.Position = UDim2.new(0.5, -150, 0.3, 0)
@@ -160,7 +160,6 @@ local UICornerGetKey = Instance.new("UICorner")
 UICornerGetKey.CornerRadius = UDim.new(0, 5)
 UICornerGetKey.Parent = BtnGetKey
 
--- Lógica do Sistema de Key (Corrigida e Sem Expiração)
 BtnGetKey.MouseButton1Click:Connect(function()
     if setclipboard then
         setclipboard(LINK_WHATSAPP)
@@ -174,7 +173,6 @@ end)
 
 BtnVerify.MouseButton1Click:Connect(function()
     local chaveDigitada = KeyInput.Text
-    
     if BANCO_DE_KEYS[chaveDigitada] then
         KeyFrame:Destroy()
         MainFrame.Visible = true
@@ -186,18 +184,16 @@ BtnVerify.MouseButton1Click:Connect(function()
     end
 end)
 
--- Título do Painel
 local Title = Instance.new("TextLabel")
 Title.Size = UDim2.new(1, 0, 0, 25)
 Title.BackgroundTransparency = 1
-Title.Text = "  G-MODS PANEL V1.0"
+Title.Text = "  G-MODS PANEL V1.5"
 Title.TextColor3 = Color3.fromRGB(0, 255, 255)
 Title.TextSize = 13
 Title.Font = Enum.Font.SourceSansBold
 Title.TextXAlignment = Enum.TextXAlignment.Left
 Title.Parent = MainFrame
 
--- Display de FPS e PING em tempo real no topo
 local MonitorLabel = Instance.new("TextLabel")
 MonitorLabel.Size = UDim2.new(0, 120, 0, 25)
 MonitorLabel.Position = UDim2.new(1, -130, 0, 0)
@@ -237,13 +233,13 @@ local UICornerBotao = Instance.new("UICorner")
 UICornerBotao.CornerRadius = UDim.new(0, 5)
 UICornerBotao.Parent = BotaoAjuda
 
--- Janela de Rolagem para Lista de Comandos V4
+-- Janela de Rolagem Modificada para Suportar Novos Comandos
 local ScrollingFrame = Instance.new("ScrollingFrame")
 ScrollingFrame.Size = UDim2.new(1, 0, 0, 240)
 ScrollingFrame.Position = UDim2.new(0, 0, 0, 135)
 ScrollingFrame.BackgroundColor3 = Color3.fromRGB(15, 15, 15)
 ScrollingFrame.Visible = false
-ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 600)
+ScrollingFrame.CanvasSize = UDim2.new(0, 0, 0, 750)
 ScrollingFrame.ScrollBarThickness = 6
 ScrollingFrame.Parent = MainFrame
 
@@ -266,7 +262,10 @@ ListaTexto.Text = [[
 > speed [num]       - Altera velocidade
 > jump [num]        - Altera força pulo
 > esp               - Realce de players
+> hitboxes          - Cabeças gigantes (Aim)
+> unhitboxes        - Hitbox normal
 > tp [player]       - Teleporta ao player
+> kill [player]     - Mata o jogador alvo
 > spin / unspin     - Gira o personagem
 > spectate [player] - Assiste o jogador
 > unspectate        - Para de assistir
@@ -285,11 +284,15 @@ ListaTexto.Text = [[
 > antilag           - Tira lag de texturas
 > killaura / unkill - Bate em quem aproximar
 > day / night       - Muda hora local
+> fullbright        - Mapa super claro
+> unfullbright      - Luz normal do jogo
 > nofog             - Limpa a névoa
 > brightness [num]  - Luz do ambiente
 > float / unfloat   - Plataforma Invisível
 > gravity [num]     - Altera a gravidade
 > superjump         - Super pulo lunar
+> fastforward       - Animação acelerada
+> normalforward     - Animação normal
 > showhidden        - Revela salas ocultas
 > unshowhidden      - Oculta as salas novamente]]
 ListaTexto.Parent = ScrollingFrame
@@ -298,7 +301,6 @@ ListaTexto.Parent = ScrollingFrame
 pcall(function()
     local contagemQuadros = 0
     local tempoAnterior = os.clock()
-    
     RunService.RenderStepped:Connect(function()
         contagemQuadros = contagemQuadros + 1
         local tempoAtual = os.clock()
@@ -307,7 +309,6 @@ pcall(function()
             contagemQuadros = 0
             tempoAnterior = tempoAtual
         end
-        
         local pingAproximado = math.floor((Workspace:GetRealPhysicsFPS() / 60) * 25)
         MonitorLabel.Text = "FPS: " .. fpsValue .. " | PING: " .. pingAproximado .. "ms"
     end)
@@ -336,9 +337,7 @@ local function alternarKillAura()
                 for _, outro in ipairs(Players:GetPlayers()) do
                     if outro ~= player and outro.Character and outro.Character:FindFirstChild("HumanoidRootPart") then
                         local distancia = (root.Position - outro.Character.HumanoidRootPart.Position).Magnitude
-                        if distancia <= 15 then
-                            tool:Activate()
-                        end
+                        if distancia <= 15 then tool:Activate() end
                     end
                 end
             end
@@ -351,18 +350,15 @@ end
 local function alternarFloat()
     if floatPart then floatPart:Destroy() floatPart = nil end
     if floatConnection then floatConnection:Disconnect() floatConnection = nil end
-    
     local char = player.Character
     local root = char and char:FindFirstChild("HumanoidRootPart")
     if not root then return end
-    
     floatPart = Instance.new("Part")
     floatPart.Size = Vector3.new(6, 0.5, 6)
     floatPart.Transparency = 1
     floatPart.Anchored = true
     floatPart.CanCollide = true
     floatPart.Parent = Workspace
-    
     floatConnection = RunService.RenderStepped:Connect(function()
         if char and root.Parent and floatPart then
             floatPart.CFrame = CFrame.new(root.Position.X, root.Position.Y - 3.25, root.Position.Z)
@@ -380,18 +376,14 @@ local function iniciarVoo()
     local rootPart = character and character:FindFirstChild("HumanoidRootPart")
     local camera = Workspace.CurrentCamera
     if not rootPart or not humanoid then return end
-    
     flying = true
     local bv = Instance.new("BodyVelocity", rootPart)
     bv.Name = "DeltaFlyVel"
     bv.MaxForce = Vector3.new(math.huge, math.huge, math.huge)
-    
     local bg = Instance.new("BodyGyro", rootPart)
     bg.Name = "DeltaFlyGyro"
     bg.MaxTorque = Vector3.new(math.huge, math.huge, math.huge)
-    
     humanoid.PlatformStand = true
-    
     flyConnection = RunService.RenderStepped:Connect(function()
         if not flying or not rootPart.Parent then 
             if flyConnection then flyConnection:Disconnect() end
@@ -427,7 +419,6 @@ BarraComando.FocusLost:Connect(function(enterPressed)
     if not enterPressed then return end
     local texto = BarraComando.Text
     BarraComando.Text = ""
-    
     local args = string.split(texto, " ")
     local comando = string.lower(args[1])
     
@@ -439,34 +430,27 @@ BarraComando.FocusLost:Connect(function(enterPressed)
         local velocidadeFornecida = tonumber(args[2])
         flySpeed = velocidadeFornecida or 50
         iniciarVoo()
-    elseif comando == "unfly" then 
-        flying = false
+    elseif comando == "unfly" then flying = false
     elseif comando == "speed" and humanoid then
         local v = tonumber(args[2]) or 16 flySpeed = v humanoid.WalkSpeed = v
     elseif comando == "jump" and humanoid then
         humanoid.UseJumpPower = true humanoid.JumpPower = tonumber(args[2]) or 50
     elseif comando == "esp" then
         espActive = not espActive
-        
         if _G.EspConnectionPlayers then _G.EspConnectionPlayers:Disconnect() _G.EspConnectionPlayers = nil end
         if _G.EspConnectionsChar then
             for _, conn in pairs(_G.EspConnectionsChar) do conn:Disconnect() end
             _G.EspConnectionsChar = {}
-        else
-            _G.EspConnectionsChar = {}
-        end
+        else _G.EspConnectionsChar = {} end
 
         local function aplicarESP(p)
             if p == player then return end
-            
             local function iluminar(char)
                 if not char then return end
                 task.wait(0.5)
                 if not espActive then return end
-                
                 local old = char:FindFirstChild("DeltaESP")
                 if old then old:Destroy() end
-                
                 local hl = Instance.new("Highlight")
                 hl.Name = "DeltaESP"
                 hl.FillColor = Color3.fromRGB(255, 0, 0)
@@ -476,30 +460,82 @@ BarraComando.FocusLost:Connect(function(enterPressed)
                 hl.Adornee = char
                 hl.Parent = char
             end
-
             if p.Character then task.spawn(iluminar, p.Character) end
-            
-            local conn = p.CharacterAdded:Connect(function(char)
-                iluminar(char)
-            end)
+            local conn = p.CharacterAdded:Connect(function(char) iluminar(char) end)
             table.insert(_G.EspConnectionsChar, conn)
         end
 
         if espActive then
-            for _, p in ipairs(Players:GetPlayers()) do
-                aplicarESP(p)
-            end
-            
-            _G.EspConnectionPlayers = Players.PlayerAdded:Connect(function(p)
-                aplicarESP(p)
-            end)
+            for _, p in ipairs(Players:GetPlayers()) do aplicarESP(p) end
+            _G.EspConnectionPlayers = Players.PlayerAdded:Connect(function(p) aplicarESP(p) end)
         else
             for _, p in ipairs(Players:GetPlayers()) do
-                if p.Character then
-                    local old = p.Character:FindFirstChild("DeltaESP")
-                    if old then old:Destroy() end
+                if p.Character then local old = p.Character:FindFirstChild("DeltaESP") if old then old:Destroy() end end
+            end
+        end
+    elseif comando == "hitboxes" then
+        hitboxActive = true
+        if hitboxConnection then hitboxConnection:Disconnect() end
+        hitboxConnection = RunService.RenderStepped:Connect(function()
+            if not hitboxActive then return end
+            for _, p in ipairs(Players:GetPlayers()) do
+                if p ~= player and p.Character and p.Character:FindFirstChild("Head") then
+                    local head = p.Character.Head
+                    head.Size = Vector3.new(3, 3, 3)
+                    head.Transparency = 0.5
+                    head.CanCollide = false
                 end
             end
+        end)
+    elseif comando == "unhitboxes" then
+        hitboxActive = false
+        if hitboxConnection then hitboxConnection:Disconnect() hitboxConnection = nil end
+        for _, p in ipairs(Players:GetPlayers()) do
+            if p.Character and p.Character:FindFirstChild("Head") then
+                local head = p.Character.Head
+                head.Size = Vector3.new(1.2, 1.2, 1.2)
+                head.Transparency = 0
+                head.CanCollide = true
+            end
+        end
+    elseif comando == "kill" then
+        local t = obterJogador(args[2])
+        if t and t.Character and t.Character:FindFirstChild("HumanoidRootPart") then
+            local alvoRoot = t.Character.HumanoidRootPart
+            -- Sistema universal de Kill por Void (Arrasta a RootPart localmente para baixo)
+            if rootPart then
+                local posicaoAnterior = rootPart.CFrame
+                rootPart.CFrame = alvoRoot.CFrame
+                task.wait(0.1)
+                alvoRoot.CFrame = CFrame.new(alvoRoot.Position.X, -500, alvoRoot.Position.Z)
+                task.wait(0.1)
+                rootPart.CFrame = posicaoAnterior
+            else
+                alvoRoot.CFrame = CFrame.new(alvoRoot.Position.X, -500, alvoRoot.Position.Z)
+            end
+        end
+    elseif comando == "fastforward" and humanoid then
+        local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid
+        animator.PlaybackSpeedMultiplier = 2.5
+    elseif comando == "normalforward" and humanoid then
+        local animator = humanoid:FindFirstChildOfClass("Animator") or humanoid
+        animator.PlaybackSpeedMultiplier = 1.0
+    elseif comando == "fullbright" then
+        propriedadesIluminacaoOriginais.Brightness = Lighting.Brightness
+        propriedadesIluminacaoOriginais.ClockTime = Lighting.ClockTime
+        propriedadesIluminacaoOriginais.GlobalShadows = Lighting.GlobalShadows
+        propriedadesIluminacaoOriginais.Ambient = Lighting.Ambient
+        
+        Lighting.Brightness = 2
+        Lighting.ClockTime = 14
+        Lighting.GlobalShadows = false
+        Lighting.Ambient = Color3.fromRGB(255, 255, 255)
+    elseif comando == "unfullbright" then
+        if propriedadesIluminacaoOriginais.Brightness then
+            Lighting.Brightness = propriedadesIluminacaoOriginais.Brightness
+            Lighting.ClockTime = propriedadesIluminacaoOriginais.ClockTime
+            Lighting.GlobalShadows = propriedadesIluminacaoOriginais.GlobalShadows
+            Lighting.Ambient = propriedadesIluminacaoOriginais.Ambient
         end
     elseif comando == "noclip" then
         noclipActive = not noclipActive
@@ -514,10 +550,7 @@ BarraComando.FocusLost:Connect(function(enterPressed)
         elseif noclipConnection then noclipConnection:Disconnect() noclipConnection = nil end
     elseif comando == "unnoclip" then
         noclipActive = false
-        if noclipConnection then 
-            noclipConnection:Disconnect() 
-            noclipConnection = nil 
-        end
+        if noclipConnection then noclipConnection:Disconnect() noclipConnection = nil end
     elseif comando == "spin" and rootPart then
         local v = tonumber(args[2]) or 30
         if spinConnection then spinConnection:Disconnect() end
@@ -546,14 +579,11 @@ BarraComando.FocusLost:Connect(function(enterPressed)
         tool.Activated:Connect(function() if mouse.Hit and rootPart then rootPart.CFrame = CFrame.new(mouse.Hit.p + Vector3.new(0,3,0)) end end)
     elseif comando == "tphome" and rootPart then
         local spawn = Workspace:FindFirstChildWhichIsA("SpawnLocation", true)
-        if spawn then
-            rootPart.CFrame = spawn.CFrame * CFrame.new(0,3,0)
-        end
+        if spawn then rootPart.CFrame = spawn.CFrame * CFrame.new(0,3,0) end
     elseif comando == "fov" then Workspace.CurrentCamera.FieldOfView = tonumber(args[2]) or 70
     elseif comando == "sit" and humanoid then humanoid.Sit = true
     elseif comando == "hipheight" and humanoid then humanoid.HipHeight = tonumber(args[2]) or 0
-    elseif comando == "re" then 
-        if humanoid then humanoid.Health = 0 end
+    elseif comando == "re" then if humanoid then humanoid.Health = 0 end
     elseif comando == "btools" then for i = 1, 4 do Instance.new("HopperBin", player.Backpack).BinType = i end
     elseif comando == "antilag" then
         for _, obj in ipairs(Workspace:GetDescendants()) do
@@ -594,8 +624,8 @@ player.CharacterAdded:Connect(function()
     flying = false infJumpActive = false noclipActive = false killAuraActive = false
     table.clear(objetosOcultosRevelados)
     if noclipConnection then noclipConnection:Disconnect() noclipConnection = nil end
-    if spinConnection then spinConnection:Disconnect() spinConnection = nil end
-    if killAuraConnection then killAuraConnection:Disconnect() killAuraConnection = nil end
-    if floatConnection then floatConnection:Disconnect() floatConnection = nil end
-    if floatPart then floatPart:Destroy() floatPart = nil end
+    if spinConnection then spinConnection:Disconnect() end
+    if killAuraConnection then killAuraConnection:Disconnect() end
+    if floatConnection then floatConnection:Disconnect() end
+    if floatPart then floatPart:Destroy() end
 end)
